@@ -1,0 +1,6 @@
+@Dekauto.Import.Service_HostAddress = http://localhost:5176
+
+GET {{Dekauto.Import.Service_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
