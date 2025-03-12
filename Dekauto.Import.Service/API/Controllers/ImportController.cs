@@ -15,6 +15,7 @@ namespace Dekauto.Import.Service.API.Controllers
         }
 
         [HttpPost]
+        [Route("LD")]
         public async Task<IActionResult> ImportLD(IFormFile file) 
         {
             try
