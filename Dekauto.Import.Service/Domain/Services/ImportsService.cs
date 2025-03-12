@@ -1,6 +1,7 @@
 ﻿using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using OfficeOpenXml;
+using System.Text.RegularExpressions;
 
 namespace Dekauto.Import.Service.Domain.Services
 {
@@ -37,7 +38,11 @@ namespace Dekauto.Import.Service.Domain.Services
                             switch (header.ToLower()) 
                             {
                                 case "фио":
-                                    student.Name = cellValue;
+                                    string pattern = @"\S+";
+                                    MatchCollection fio = Regex.Matches(cellValue, pattern);
+                                    student.Name = fio[0].Value;
+                                    student.Surname = fio[1].Value;
+                                    if (fio.Count > 2) student.Pathronymic = fio[2].Value;
                                     break;
                             }
                         }
