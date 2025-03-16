@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dekauto.Import.Service.API.Controllers
 {
-    [Route("api/imorts")]
+    [Route("api/imports")]
     [ApiController]
     public class ImportController : ControllerBase
     {
