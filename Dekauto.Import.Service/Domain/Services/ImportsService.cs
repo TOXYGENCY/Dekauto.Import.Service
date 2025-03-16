@@ -29,11 +29,23 @@ namespace Dekauto.Import.Service.Domain.Services
                     for (int row = 2; row <= rowCount; row++) 
                     {
                         var student = new Student();
-                        
+                        string courseOfTraining = string.Empty;
+
                         for (int col = 1; col <= columnCount; col++) 
                         {
                             var header = headers[col-1];
                             var cellValue = worksheet.Cells[row, col].Value ?? "";
+
+                            string indexPattern = @"\b\d{6}\b";
+                            string addressTypePattern = @"\b(?:\w+)\s+([г|с])\b(?:\,)";
+                            string cityPattern = @"\b(\w+)\s+(?:[г|с]\,)"; // Пока что тригер работает только на города и села, для увеличения вариантов нужно идти в деканат
+                            string housePattern = @"\b(?:д\.)\s+(\w+)\b(?:,)?";
+                            string streetPattern = @",\s*([^,]*?)\s*,\s+д\.";
+                            string housingTypePattern = @"\b([к|с])\.\w*?"; // Нужно уточнение, как обозначается строение
+                            string housingPattern = @"[к|с]\.\s+(\w+)";
+                            string apartementPattern = @"кв\.\s+(\w+)";
+                            string numConcursPattern = @"(\d{2}\.\d{2}\.\d{2})";
+                            
 
                             switch (header.ToLower()) 
                             {
@@ -90,6 +102,70 @@ namespace Dekauto.Import.Service.Domain.Services
                                     break;
                                 case "сумма баллов за инд.дост.(конкурсные)":
                                     student.BonusScores = short.Parse(cellValue.ToString());
+                                    break;
+                                case "адрес по прописке":
+                                    student.AddressRegistrationIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
+                                    student.AddressRegistrationCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
+                                    switch (Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString())
+                                    {
+                                        case "г":
+                                            student.AddressRegistrationType = "город";
+                                            break;
+                                        case "с":
+                                            student.AddressRegistrationType = "село";
+                                            break;
+                                    }
+                                    student.AddressRegistrationHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
+                                    student.AddressRegistrationStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
+                                    if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к") 
+                                        student.AddressRegistrationHousingType = "корпус";
+                                    else
+                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "с") 
+                                            student.AddressRegistrationHousingType = "строение";
+                                    student.AddressRegistrationHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
+                                    student.AddressRegistrationApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+                                    break;
+
+                                case "адрес проживания":
+                                    student.AddressResidentialIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
+                                    student.AddressResidentialCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
+                                    switch(Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString()) 
+                                    {
+                                        case "г":
+                                            student.AddressResidentialType = "город";
+                                            break;
+                                        case "с":
+                                            student.AddressResidentialType = "село";
+                                            break;
+                                    }
+                                    student.AddressResidentialHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
+                                    student.AddressResidentialStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
+                                    if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к")
+                                        student.AddressResidentialHousingType = "корпус";
+                                    else
+                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "с")
+                                        student.AddressResidentialHousingType = "строение";
+                                    student.AddressResidentialHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
+                                    student.AddressResidentialApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+
+                                    break;
+                                case "конкурсная группа":
+                                    courseOfTraining = Regex.Match(cellValue.ToString(), numConcursPattern).Groups[1].ToString().Trim();
+                                    break;
+                                case "направление\\специальность":
+                                    student.CourseOfTraining = $"{courseOfTraining} {cellValue.ToString()}";
+                                    break;
+                                case "серия документа об образовании":
+                                    student.EducationReceivedSerial = cellValue.ToString();
+                                    break;
+                                case "номер документа об образовании":
+                                    student.EducationReceivedNum = cellValue.ToString();
+                                    break;
+                                case "дата выдачи":
+                                    student.EducationReceivedDate = (DateTime?)cellValue;
+                                    break;
+                                case "год завершения":
+                                    student.EducationReceivedEndYear = short.Parse(cellValue.ToString());
                                     break;
                             }
                         }
