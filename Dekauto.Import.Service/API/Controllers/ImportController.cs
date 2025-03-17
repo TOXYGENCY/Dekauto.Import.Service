@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dekauto.Import.Service.API.Controllers
 {
-    [Route("api/imports")]
+    [Route("api/import")]
     [ApiController]
     public class ImportController : ControllerBase
     {
@@ -15,15 +15,15 @@ namespace Dekauto.Import.Service.API.Controllers
         }
 
         [HttpPost]
-        [Route("LD")]
-        public async Task<IActionResult> ImportLD(IFormFile file) 
+        [Route("students")]
+        public async Task<IActionResult> ImportFiles(IFormFile ld, IFormFile? contract) 
         {
             try
             {
-                if (file == null || file.Length == 0) throw new ArgumentNullException("Файл не найден");
-                if (Path.GetExtension(file.FileName) != ".xlsx") throw new ArgumentNullException(
+                if (ld == null || ld.Length == 0) throw new ArgumentNullException("Файл не найден");
+                if (Path.GetExtension(ld.FileName) != ".xlsx") throw new ArgumentNullException(
                     "Неподдерживаемый формат файла. Пожалуйста, загрузите файл в формате .xlsx");
-                var students = _importService.GetStudentsLD(file);
+                var students = _importService.GetStudentsLD(ld);
                 return Ok(students);
             }
             catch (Exception) 
