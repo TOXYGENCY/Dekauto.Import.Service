@@ -40,8 +40,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                 switch (header.ToLower()) 
                                 {
                                     case "фио обучающегося":
-                                        string cellfio = cellValue.ToString().Replace(" ", "");
-                                        if (cellfio.ToLower() == fio) isCurrentStudent = true;
+                                        string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
+                                        if (cellfio == fio) isCurrentStudent = true;
                                         break;
                                     case "дата":
                                         if (isCurrentStudent == true) 
