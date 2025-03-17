@@ -16,7 +16,7 @@ namespace Dekauto.Import.Service.API.Controllers
 
         [HttpPost]
         [Route("students")]
-        public async Task<IActionResult> ImportLD(IFormFile ld, IFormFile? contract, IFormFile? journal) 
+        public async Task<IActionResult> ImportStudents(IFormFile ld, IFormFile? contract, IFormFile? journal) 
         {
             try
             {
