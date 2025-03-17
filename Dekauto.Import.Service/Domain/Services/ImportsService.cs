@@ -33,16 +33,27 @@ namespace Dekauto.Import.Service.Domain.Services
                             bool isCurrentStudent = false;
                             string enrollementOrderDatePattern = @"\d{2}\.\d{2}\.\d{4}";
                             string enrollementOrderNumPattern = @"\d*\-\d*\/\d*";
+                            for (int col = 1; col <= columnCount; col++)
+                            {
+                                var header = headers[col - 1];
+                                var cellValue = worksheet.Cells[row, col].Value ?? "";
+
+                                if (header.ToLower() == "фио обучающегося")
+                                {
+                                    string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
+                                    if (cellfio == fio)
+                                    {
+                                        isCurrentStudent = true;
+                                        break; // Прерываем цикл, если нашли соответствие
+                                    }
+                                }
+                            }
                             for (int col = 1; col <= columnCount; col++) 
                             {
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
                                 switch (header.ToLower()) 
                                 {
-                                    case "фио обучающегося":
-                                        string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
-                                        if (cellfio == fio) isCurrentStudent = true;
-                                        break;
                                     case "дата":
                                         if (isCurrentStudent == true) 
                                         {
