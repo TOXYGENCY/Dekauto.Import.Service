@@ -1,6 +1,7 @@
 ﻿using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using OfficeOpenXml;
+using System.Diagnostics.Contracts;
 using System.Text.RegularExpressions;
 
 namespace Dekauto.Import.Service.Domain.Services
@@ -74,6 +75,66 @@ namespace Dekauto.Import.Service.Domain.Services
                                             student.EnrollementOrderDate = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString());
                                             student.EnrollementOrderNum = Regex.Match(cellValue.ToString(), enrollementOrderNumPattern).ToString();
                                         }
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return students;
+        }
+
+        public async Task<IEnumerable<Student>> GetStudentsJournal(IFormFile journal, List<Student> students)
+        {
+            using (var stream = new MemoryStream())
+            {
+                await journal.CopyToAsync(stream);
+                using (var packege = new ExcelPackage(stream))
+                {
+                    var worksheet = packege.Workbook.Worksheets[0];
+
+                    var columnCount = worksheet.Dimension.Columns;
+                    var rowCount = worksheet.Dimension.Rows;
+
+                    var headers = new List<string>();
+                    for (int col = 1; col <= columnCount; col++)
+                    {
+                        headers.Add(worksheet.Cells[1, col].Text);
+                    }
+
+                    foreach (var student in students)
+                    {
+                        string fio = $"{student.Name}{student.Surname}{student.Pathronymic}".ToLower();
+                        bool isCurrentStudent = false;
+                        for (int row = 4; row <= rowCount; row++)
+                        {
+                            for (int col = 1; col <= columnCount; col++)
+                            {
+                                var header = headers[col - 1];
+                                var cellValue = worksheet.Cells[row, col].Value ?? "";
+
+                                if (header.ToLower() == "фио студента")
+                                {
+                                    string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
+                                    if (cellfio == fio)
+                                    {
+                                        isCurrentStudent = true;
+                                        break; // Прерываем цикл, если нашли соответствие
+                                    }
+                                }
+                            }
+                            for (int col = 1; col <= columnCount; col++)
+                            {
+                                var header = headers[col - 1];
+                                var cellValue = worksheet.Cells[row, col].Value ?? "";
+                                switch (header.ToLower()) 
+                                {
+                                    case "№ студ.билета и зачетной книжки":
+                                        student.GradeBook = cellValue.ToString();
+                                        break;
+                                    case "№ группы":
+                                        student.GroupName = cellValue.ToString();
                                         break;
                                 }
                             }

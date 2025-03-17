@@ -16,7 +16,7 @@ namespace Dekauto.Import.Service.API.Controllers
 
         [HttpPost]
         [Route("students")]
-        public async Task<IActionResult> ImportStudents(IFormFile ld, IFormFile? contract, IFormFile? journal) 
+        public async Task<IActionResult> ImportStudents(IFormFile ld, IFormFile contract, IFormFile journal) 
         {
             try
             {
@@ -24,7 +24,9 @@ namespace Dekauto.Import.Service.API.Controllers
                 if (Path.GetExtension(ld.FileName) != ".xlsx") throw new ArgumentNullException(
                     "Неподдерживаемый формат файла. Пожалуйста, загрузите файл в формате .xlsx");
                 var studentsLD = await _importService.GetStudentsLD(ld);
-                var students = await _importService.GetStudentsContract(contract, (List<Domain.Entities.Student>)studentsLD);
+                var studentsOrder = await _importService.GetStudentsContract(contract, (List<Domain.Entities.Student>)studentsLD);
+                var students = await _importService.GetStudentsJournal(journal, (List<Domain.Entities.Student>)studentsOrder);
+
                 return Ok(students);
             }
             catch (Exception) 
