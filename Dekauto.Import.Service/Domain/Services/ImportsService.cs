@@ -8,6 +8,11 @@ namespace Dekauto.Import.Service.Domain.Services
 {
     public class ImportsService : IImportService
     {
+        private IConfiguration configuration;
+        public ImportsService(IConfiguration configuration)
+        {
+            this.configuration = configuration;
+        }
         public async Task<IEnumerable<Student>> GetStudentsContract(IFormFile contract, List<Student> students)
         {
             using (var stream = new MemoryStream()) 
@@ -15,7 +20,7 @@ namespace Dekauto.Import.Service.Domain.Services
                 await contract.CopyToAsync(stream);
                 using (var packege = new ExcelPackage(stream)) 
                 {
-                    var worksheet = packege.Workbook.Worksheets[0];
+                    var worksheet = packege.Workbook.Worksheets[0] ?? throw new InvalidOperationException("Загруженный файл не содержит листов");
 
                     var columnCount = worksheet.Dimension.Columns;
                     var rowCount = worksheet.Dimension.Rows;
@@ -25,7 +30,7 @@ namespace Dekauto.Import.Service.Domain.Services
                     {
                         headers.Add(worksheet.Cells[1, col].Text);
                     }
-
+                    if (students.Count == 0 || students == null) throw new ArgumentNullException("Студенты отсутствуют в таблице личных дел");
                     foreach (var student in students) 
                     {
                         string fio = $"{student.Name}{student.Surname}{student.Pathronymic}".ToLower();
@@ -45,7 +50,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     if (cellfio == fio)
                                     {
                                         isCurrentStudent = true;
-                                        break; // Прерываем цикл, если нашли соответствие
+                                        break; 
                                     }
                                 }
                             }
@@ -92,7 +97,7 @@ namespace Dekauto.Import.Service.Domain.Services
                 await journal.CopyToAsync(stream);
                 using (var packege = new ExcelPackage(stream))
                 {
-                    var worksheet = packege.Workbook.Worksheets[0];
+                    var worksheet = packege.Workbook.Worksheets[0] ?? throw new InvalidOperationException("Загруженный файл не содержит листов");
 
                     var columnCount = worksheet.Dimension.Columns;
                     var rowCount = worksheet.Dimension.Rows;
@@ -106,9 +111,10 @@ namespace Dekauto.Import.Service.Domain.Services
                     foreach (var student in students)
                     {
                         string fio = $"{student.Name}{student.Surname}{student.Pathronymic}".ToLower();
-                        bool isCurrentStudent = false;
+                        
                         for (int row = 4; row <= rowCount; row++)
                         {
+                            bool isCurrentStudent = false;
                             for (int col = 1; col <= columnCount; col++)
                             {
                                 var header = headers[col - 1];
@@ -120,7 +126,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     if (cellfio == fio)
                                     {
                                         isCurrentStudent = true;
-                                        break; // Прерываем цикл, если нашли соответствие
+                                        break;
                                     }
                                 }
                             }
@@ -131,10 +137,12 @@ namespace Dekauto.Import.Service.Domain.Services
                                 switch (header.ToLower()) 
                                 {
                                     case "№ студ.билета и зачетной книжки":
-                                        student.GradeBook = cellValue.ToString();
+                                        if (isCurrentStudent)
+                                            student.GradeBook = cellValue.ToString();
                                         break;
                                     case "№ группы":
-                                        student.GroupName = cellValue.ToString();
+                                        if (isCurrentStudent)
+                                            student.GroupName = cellValue.ToString();
                                         break;
                                 }
                             }
@@ -153,7 +161,7 @@ namespace Dekauto.Import.Service.Domain.Services
                 await ld.CopyToAsync(stream);
                 using (var package = new ExcelPackage(stream)) 
                 {
-                    var worksheet = package.Workbook.Worksheets[0];
+                    var worksheet = package.Workbook.Worksheets[0] ?? throw new InvalidOperationException("Загруженный файл не содержит листов");
 
                     var columnCount = worksheet.Dimension.Columns;
                     var rowCount = worksheet.Dimension.Rows;
@@ -202,9 +210,15 @@ namespace Dekauto.Import.Service.Domain.Services
                                 case "фио":
                                     string pattern = @"\S+";
                                     MatchCollection fio = Regex.Matches(cellValue.ToString().ToLower(), pattern);
-                                    student.Name = fio[0].Value;
-                                    student.Surname = fio[1].Value;
-                                    if (fio.Count > 2) student.Pathronymic = fio[2].Value;
+                                    string name = $"{fio[0].ToString().Substring(0,1).ToUpper()}{fio[0].ToString().Substring(1)}";
+                                    student.Name = name;
+                                    string surname = $"{fio[1].ToString().Substring(0, 1).ToUpper()}{fio[1].ToString().Substring(1)}";
+                                    student.Surname = surname;
+                                    if (fio.Count > 2) 
+                                    {
+                                        string pathronymic = $"{fio[2].ToString().Substring(0, 1).ToUpper()}{fio[2].ToString().Substring(1)}";
+                                        student.Pathronymic = pathronymic;
+                                    }
                                     else student.Pathronymic = "";
                                     break;
                                 case "пол":
