@@ -1,4 +1,5 @@
-﻿using Dekauto.Import.Service.Domain.Interfaces;
+﻿using Dekauto.Import.Service.Domain.Entities.Adapters;
+using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,10 +17,14 @@ namespace Dekauto.Import.Service.API.Controllers
 
         [HttpPost]
         [Route("students")]
-        public async Task<IActionResult> ImportStudents(IFormFile ld, IFormFile contract, IFormFile journal) 
+        public async Task<IActionResult> ImportStudents([FromForm] ImportFilesAdapter files) 
         {
             try
             {
+                var ld = files.ld;
+                var contract = files.contract;
+                var journal = files.journal;
+
                 if (ld == null || ld.Length == 0 ||
                     contract == null || contract.Length == 0 ||
                     journal == null || journal.Length == 0) throw new ArgumentNullException("Файл не найден");
