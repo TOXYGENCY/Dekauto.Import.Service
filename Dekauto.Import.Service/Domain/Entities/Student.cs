@@ -4,7 +4,7 @@
     {
         public string? Name { get; set; } // Имя +
         public string? Surname { get; set; } // Фамилия +
-        public string? Pathronymic { get; set; } // Отчество +
+        public string? Patronymic { get; set; } // Отчество +
         public bool? Gender { get; set; } // Пол +
         public DateTime? BirthdayDate { get; set; } // Дата рождения +
         public string? BirthdayPlace { get; set; } // Место рождения +

@@ -33,7 +33,7 @@ namespace Dekauto.Import.Service.Domain.Services
                     if (students.Count == 0 || students == null) throw new ArgumentNullException("Студенты отсутствуют в таблице личных дел");
                     foreach (var student in students) 
                     {
-                        string fio = $"{student.Name}{student.Surname}{student.Pathronymic}".ToLower();
+                        string fio = $"{student.Name}{student.Surname}{student.Patronymic}".ToLower();
                         for (int row = 2; row <= rowCount; row++) 
                         {
                             bool isCurrentStudent = false;
@@ -110,7 +110,7 @@ namespace Dekauto.Import.Service.Domain.Services
 
                     foreach (var student in students)
                     {
-                        string fio = $"{student.Name}{student.Surname}{student.Pathronymic}".ToLower();
+                        string fio = $"{student.Name}{student.Surname}{student.Patronymic}".ToLower();
                         
                         for (int row = 4; row <= rowCount; row++)
                         {
@@ -221,10 +221,10 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.Surname = surname;
                                     if (fio.Count > 2) 
                                     {
-                                        string pathronymic = $"{fio[2].ToString().Substring(0, 1).ToUpper()}{fio[2].ToString().Substring(1)}";
-                                        student.Pathronymic = pathronymic;
+                                        string patronymic = $"{fio[2].ToString().Substring(0, 1).ToUpper()}{fio[2].ToString().Substring(1)}";
+                                        student.Patronymic = patronymic;
                                     }
-                                    else student.Pathronymic = "";
+                                    else student.Patronymic = "";
                                     break;
                                 case "пол":
                                     if (cellValue.ToString().ToLower() == "мужской") student.Gender = true; 
