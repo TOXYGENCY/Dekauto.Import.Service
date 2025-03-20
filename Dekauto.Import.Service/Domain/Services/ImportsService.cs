@@ -44,7 +44,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
 
-                                if (header.ToLower() == "фио обучающегося")
+                                if (header.ToLower() == "фио обучающегося" || header.ToLower() == "фио студента")
                                 {
                                     string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
                                     if (cellfio == fio)
@@ -68,13 +68,13 @@ namespace Dekauto.Import.Service.Domain.Services
                                             student.EducationFinishYear = (short)(student.EducationStartYear + student.EducationTime);
                                         }
                                         break;
-                                    case "№ договора":
+                                    case "№ договора": case "номер договора":
                                         if (isCurrentStudent == true)
                                         {
                                             student.EducationRelationNum = cellValue.ToString();
                                         }
                                         break;
-                                    case "№ приказа о зачислении":
+                                    case "№ приказа о зачислении": case "номер приказа о зачислении":
                                         if (isCurrentStudent == true)
                                         {
                                             student.EnrollementOrderDate = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString());
@@ -120,7 +120,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
 
-                                if (header.ToLower() == "фио студента")
+                                if (header.ToLower() == "фио студента" || header.ToLower() == "фио обучающегося")
                                 {
                                     string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
                                     if (cellfio == fio)
@@ -136,11 +136,16 @@ namespace Dekauto.Import.Service.Domain.Services
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
                                 switch (header.ToLower()) 
                                 {
-                                    case "№ студ.билета и зачетной книжки":
+                                    case "№ студ.билета и зачетной книжки": 
+                                    case "№ студ.билета":
+                                    case "№ зачетной книжки":
+                                    case "№ зачетки":
+                                    case "номер зачетки":
                                         if (isCurrentStudent)
                                             student.GradeBook = cellValue.ToString();
                                         break;
                                     case "№ группы":
+                                    case "номер группы":
                                         if (isCurrentStudent)
                                             student.GroupName = cellValue.ToString();
                                         break;
@@ -196,7 +201,7 @@ namespace Dekauto.Import.Service.Domain.Services
                             var cellValue = worksheet.Cells[row, col].Value ?? "";
 
                             string indexPattern = @"\b\d{6}\b";
-                            string addressTypePattern = @"\b(?:\w+)\s+([г|с])\b(?:\,)";
+                            string addressTypePattern = @"\b(?:\w+)\s+([г|с|х|д|п])\b(?:\,)";
                             string cityPattern = @"\b(\w+)\s+(?:[г|с|х|д|п]\,)"; // Пока что тригер работает только на города и села, для увеличения вариантов нужно идти в деканат
                             string housePattern = @"\b(?:д\.)\s+(\w+)\b(?:,)?";
                             string streetPattern = @",\s*([^,]*?)\s*,\s+д\.";
@@ -235,6 +240,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.PhoneNumber = cellValue.ToString();
                                     break;
                                 case "e-mail":
+                                case "почта":
                                     student.Email = cellValue.ToString();
                                     break;
                                 case "серия документа удостоверяющего личность":
@@ -246,7 +252,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                 case "овддокумента удостоверяющего личность":
                                     student.PassportIssuancePlace = cellValue.ToString();
                                     break;
-                                case "код подразделения документа удостоверяющего личность": // Здесь нужны уточнения, как называется поле
+                                case "код подразделения документа удостоверяющего личность":
+                                case "код подразделения":// Здесь нужны уточнения, как называется поле
                                     student.PassportIssuanceCode = cellValue.ToString();
                                     break;
                                 case "дата выдачи паспорта": // Здесь нужны уточнения, как называется поле и существует ли вообще
@@ -265,6 +272,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.GiaExam3Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "сумма баллов за инд.дост.(конкурсные)":
+                                case "сумма баллов за инд.дост.":
                                     student.BonusScores = short.Parse(cellValue.ToString());
                                     break;
                                 case "адрес по прописке":
