@@ -6,7 +6,7 @@
         public string? Surname { get; set; } // Фамилия +
         public string? Patronymic { get; set; } // Отчество +
         public bool? Gender { get; set; } // Пол +
-        public DateTime? BirthdayDate { get; set; } // Дата рождения +
+        public DateOnly? BirthdayDate { get; set; } // Дата рождения +
         public string? BirthdayPlace { get; set; } // Место рождения +
         public string? PhoneNumber { get; set; } // Номер телефона +
         public string? Email { get; set; } // Email +
@@ -14,7 +14,7 @@
         public string? PassportSerial { get; set; } // Серия паспорта +
         public string? PassportNumber { get; set; } // Номер паспорта +
         public string? PassportIssuancePlace { get; set; } // Место выдачи паспорта +
-        public DateTime? PassportIssuanceDate { get; set; } // Дата выдачи паспорта +
+        public DateOnly? PassportIssuanceDate { get; set; } // Дата выдачи паспорта +
         public string? PassportIssuanceCode { get; set; } // Код выдачи паспорта +
         public string? Citizenship { get; set; } // Гражданство +
         public string? AddressRegistrationIndex { get; set; } // Почтовый индекс регистрации +
@@ -38,7 +38,7 @@
         public string? AddressResidentialHousing { get; set; } // Корпус проживания +
         public string? AddressResidentialApartment { get; set; } // Квартира проживания +
         public bool? LivingInDormitory { get; set; } // Проживание в общежитии +
-        public DateTime? EnrollementOrderDate { get; set; } // Дата приказа о зачислении +
+        public DateOnly? EnrollementOrderDate { get; set; } // Дата приказа о зачислении +
         public string? EnrollementOrderNum { get; set; } // Номер приказа о зачислении +
         public string? GroupName { get; set; } // Название группы
         public string? GiaExam1Name { get; set; } // Название экзамена 1 +
@@ -56,7 +56,7 @@
         public string? EducationReceived { get; set; } // Полученное образование +
         public string? EducationReceivedSerial { get; set; } // Серия полученного образования +
         public string? EducationReceivedNum { get; set; } // Номер полученного образования +
-        public DateTime? EducationReceivedDate { get; set; } // Дата полученного образования +
+        public DateOnly? EducationReceivedDate { get; set; } // Дата полученного образования +
         public string? OOName { get; set; } // Название образовательной организации +
         public string? OOAddress { get; set; } // Адрес образовательной организации +
         public short? EducationReceivedEndYear { get; set; } // Дата окончания ОО +
@@ -74,6 +74,6 @@
         public string? EducationBase { get; set; } // Основа обучения + 
         public string? EducationRelationForm { get; set; } // Форма отношений +
         public string? EducationRelationNum { get; set; } // Номер отношений с учебным заведением +
-        public DateTime? EducationRelationDate { get; set; } // Дата начала отношений с учебным заведением +
+        public DateOnly? EducationRelationDate { get; set; } // Дата начала отношений с учебным заведением +
     }
 }

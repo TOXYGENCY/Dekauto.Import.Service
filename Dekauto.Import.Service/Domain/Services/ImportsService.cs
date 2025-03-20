@@ -63,7 +63,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "дата":
                                         if (isCurrentStudent == true) 
                                         {
-                                            student.EducationRelationDate = DateTime.Parse(cellValue.ToString());
+                                            DateTime date = (DateTime)cellValue;
+                                            student.EducationRelationDate = DateOnly.FromDateTime(date);
                                             student.EducationStartYear = short.Parse(student.EducationRelationDate.Value.Year.ToString());
                                             student.EducationFinishYear = (short)(student.EducationStartYear + student.EducationTime);
                                         }
@@ -77,7 +78,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "№ приказа о зачислении": case "номер приказа о зачислении":
                                         if (isCurrentStudent == true)
                                         {
-                                            student.EnrollementOrderDate = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString());
+                                            DateTime date = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString());
+                                            student.EnrollementOrderDate = DateOnly.FromDateTime(date);
                                             student.EnrollementOrderNum = Regex.Match(cellValue.ToString(), enrollementOrderNumPattern).ToString();
                                         }
                                         break;
@@ -231,7 +233,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     else student.Gender = false;
                                     break;
                                 case "дата рождения":
-                                    student.BirthdayDate = (DateTime?)cellValue;
+                                    DateTime birthdayDate = (DateTime)cellValue;
+                                    student.BirthdayDate = DateOnly.FromDateTime(birthdayDate);
                                     break;
                                 case "место рождения":
                                     student.BirthdayPlace = cellValue.ToString();
@@ -257,7 +260,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.PassportIssuanceCode = cellValue.ToString();
                                     break;
                                 case "дата выдачи паспорта": // Здесь нужны уточнения, как называется поле и существует ли вообще
-                                    student.PassportIssuanceDate = (DateTime?)cellValue;
+                                    DateTime passportDate = (DateTime)cellValue;
+                                    student.PassportIssuanceDate = DateOnly.FromDateTime(passportDate);
                                     break;
                                 case "гражданство":
                                     student.Citizenship = cellValue.ToString();
@@ -352,7 +356,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.EducationReceivedNum = cellValue.ToString();
                                     break;
                                 case "дата выдачи":
-                                    student.EducationReceivedDate = (DateTime?)cellValue;
+                                    DateTime eduReceivedDate = (DateTime)cellValue;
+                                    student.EducationReceivedDate = DateOnly.FromDateTime(eduReceivedDate);
                                     break;
                                 case "год завершения":
                                     student.EducationReceivedEndYear = short.Parse(cellValue.ToString());
