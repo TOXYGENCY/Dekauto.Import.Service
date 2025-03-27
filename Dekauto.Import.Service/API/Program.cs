@@ -14,13 +14,20 @@ builder.Services.AddTransient<IImportService, ImportsService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+
+// Явно указываем порты (для Docker)
+app.Urls.Add("http://*:5503");
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+else
+{
+    app.Urls.Add("https://*:5504");
+    app.UseHttpsRedirection(); // без https редиректа в dev-версии
+}
 
 app.UseAuthorization();
 
