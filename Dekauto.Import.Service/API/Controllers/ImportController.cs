@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Dekauto.Import.Service.API.Controllers
 {
+    //Раз мы здесь используем GraphQL, по факту контроллер здесь не нужен
     [Route("api/imports")]
     [ApiController]
     public class ImportController : ControllerBase
@@ -28,9 +29,9 @@ namespace Dekauto.Import.Service.API.Controllers
                 if (ld == null || ld.Length == 0 ||
                     contract == null || contract.Length == 0 ||
                     journal == null || journal.Length == 0) throw new ArgumentNullException("Файл не найден");
-                if (Path.GetExtension(ld.FileName) != ".xlsx" || 
-                    Path.GetExtension(contract.FileName) != ".xlsx" || 
-                    Path.GetExtension(journal.FileName) != ".xlsx") throw new FileLoadException(
+                if (System.IO.Path.GetExtension(ld.FileName) != ".xlsx" ||
+                    System.IO.Path.GetExtension(contract.FileName) != ".xlsx" || 
+                    System.IO.Path.GetExtension(journal.FileName) != ".xlsx") throw new FileLoadException(
                     "Неподдерживаемый формат файла. Пожалуйста, загрузите файл в формате .xlsx");
                 var studentsLD = await _importService.GetStudentsLD(ld);
                 var studentsOrder = await _importService.GetStudentsContract(contract, (List<Domain.Entities.Student>)studentsLD);
