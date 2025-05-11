@@ -1,6 +1,9 @@
 using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,11 +12,56 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Import Service", Version = "v1" });
+
+    c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Basic",
+        In = ParameterLocation.Header,
+        Description = "Basic Authorization header using the Bearer scheme."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Basic"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 builder.Services.AddTransient<IImportService, ImportsService>();
 builder.Services.AddScoped<Mutation>();
 builder.Services
+    .AddAuthentication("Basic")
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
+        "Basic",
+        options => { });
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new AuthorizationPolicyBuilder("Basic")
+        .RequireAuthenticatedUser()
+        .Build();
+});
+builder.Services
     .AddGraphQLServer()
+    .AddAuthorization(options =>
+    {
+        options.DefaultPolicy = new AuthorizationPolicyBuilder()
+            .AddAuthenticationSchemes("Basic") // явно указываем схему
+            .RequireAuthenticatedUser()
+            .Build();
+    })
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddType<UploadType>();
@@ -29,15 +77,19 @@ builder.Services.AddCors(options =>
         builder => builder
             .AllowAnyOrigin()
             .AllowAnyMethod()
-            .AllowAnyHeader());
+            .AllowAnyHeader()
+            .WithExposedHeaders("WWW-Authenticate"));
 });
 
 var app = builder.Build();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseCors("AllowAll");
+app.UseRouting();
 
-
-app.MapGraphQL();
+app.MapGraphQL().RequireAuthorization();
 
 // Configure the HTTP request pipeline.
 
@@ -55,7 +107,7 @@ else
     app.UseHttpsRedirection(); // без https редиректа в dev-версии
 }
 
-app.UseAuthorization();
+
 
 app.MapControllers();
 

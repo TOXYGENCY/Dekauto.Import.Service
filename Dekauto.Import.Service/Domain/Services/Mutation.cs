@@ -2,11 +2,13 @@
 using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using HotChocolate;
+using HotChocolate.Authorization;
 
 namespace Dekauto.Import.Service.Domain.Services
 {
     public class Mutation
     {
+        [Authorize]
         public async Task<List<Student>> ImportStudents(
         string ld,       // Base64
         string contract,
