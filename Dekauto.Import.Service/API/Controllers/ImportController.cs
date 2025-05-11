@@ -1,6 +1,7 @@
 ﻿using Dekauto.Import.Service.Domain.Entities.Adapters;
 using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dekauto.Import.Service.API.Controllers
@@ -8,6 +9,7 @@ namespace Dekauto.Import.Service.API.Controllers
     //Раз мы здесь используем GraphQL, по факту контроллер здесь не нужен
     [Route("api/imports")]
     [ApiController]
+    [Authorize]
     public class ImportController : ControllerBase
     {
         private readonly IImportService _importService;

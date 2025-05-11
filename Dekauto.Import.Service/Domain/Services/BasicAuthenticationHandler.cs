@@ -60,8 +60,8 @@ namespace Dekauto.Import.Service.Domain.Services
 
         private bool ValidateCredentials(string clientId, string clientSecret)
         {
-            var validClientId = _configuration["ServiceAuth:ClientId"];
-            var validClientSecret = _configuration["ServiceAuth:ClientSecret"];
+            var validClientId = Environment.GetEnvironmentVariable("ServiceAuth__ClientId");
+            var validClientSecret = Environment.GetEnvironmentVariable("ServiceAuth__ClientSecret");
 
             return clientId == validClientId && clientSecret == validClientSecret;
         }

@@ -2,7 +2,8 @@
 using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using HotChocolate;
-using HotChocolate.Authorization;
+using Microsoft.AspNetCore.Authorization;
+
 
 namespace Dekauto.Import.Service.Domain.Services
 {
