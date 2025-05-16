@@ -2,6 +2,7 @@ using System.Text;
 using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
+using Dekauto.Import.Service.Domain.Services.Metric;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
@@ -68,6 +69,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 builder.Services.AddTransient<IImportService, ImportsService>();
+builder.Services.AddSingleton<IRequestMetricsService, RequestMetricsService>();
 builder.Services.AddScoped<Mutation>();
 builder.Services
     .AddAuthentication("Basic")
@@ -137,8 +139,8 @@ else
     app.UseHttpsRedirection(); // без https редиректа в dev-версии
 }
 
-
-
 app.MapControllers();
+
+app.UseMetricsMiddleware(); // Метрики
 
 app.Run();
