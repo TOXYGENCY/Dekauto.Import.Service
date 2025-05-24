@@ -23,13 +23,29 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-else
+
+// Включаем https, если указано в конфиге
+if (Boolean.Parse(app.Configuration["UseHttps"] ?? "false"))
 {
     app.Urls.Add("https://*:5504");
-    app.UseHttpsRedirection(); // без https редиректа в dev-версии
+    app.UseHttpsRedirection();
+    //Log.Information("Enabled HTTPS.");
+}
+else
+{
+    //Log.Warning("Disabled HTTPS.");
 }
 
-app.UseAuthorization();
+if (Boolean.Parse(app.Configuration["UseEndpointAuth"] ?? "true"))
+{
+    // Включаем межсервисную авторизацию (в том числе через [Authorize])
+    //Log.Information("Enabled basic authorization.");
+    app.UseAuthorization();
+}
+else
+{
+    //Log.Warning("Disabled basic authorization.");
+}
 
 app.MapControllers();
 
