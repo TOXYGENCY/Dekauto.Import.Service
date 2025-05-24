@@ -33,7 +33,7 @@ namespace Dekauto.Import.Service.Domain.Services
                     if (students.Count == 0 || students == null) throw new ArgumentNullException("Студенты отсутствуют в таблице личных дел");
                     foreach (var student in students) 
                     {
-                        string fio = $"{student.Name}{student.Surname}{student.Patronymic}".ToLower();
+                        string fio = $"{student.Surname}{student.Name}{student.Patronymic}".ToLower();
                         for (int row = 2; row <= rowCount; row++) 
                         {
                             bool isCurrentStudent = false;
@@ -112,7 +112,7 @@ namespace Dekauto.Import.Service.Domain.Services
 
                     foreach (var student in students)
                     {
-                        string fio = $"{student.Name}{student.Surname}{student.Patronymic}".ToLower();
+                        string fio = $"{student.Surname}{student.Name}{student.Patronymic}".ToLower();
                         
                         for (int row = 4; row <= rowCount; row++)
                         {
@@ -217,9 +217,9 @@ namespace Dekauto.Import.Service.Domain.Services
                                 case "фио":
                                     string pattern = @"\S+";
                                     MatchCollection fio = Regex.Matches(cellValue.ToString().ToLower(), pattern);
-                                    string name = $"{fio[0].ToString().Substring(0,1).ToUpper()}{fio[0].ToString().Substring(1)}";
+                                    string name = $"{fio[1].ToString().Substring(0,1).ToUpper()}{fio[1].ToString().Substring(1)}";
                                     student.Name = name;
-                                    string surname = $"{fio[1].ToString().Substring(0, 1).ToUpper()}{fio[1].ToString().Substring(1)}";
+                                    string surname = $"{fio[0].ToString().Substring(0, 1).ToUpper()}{fio[0].ToString().Substring(1)}";
                                     student.Surname = surname;
                                     if (fio.Count > 2) 
                                     {
