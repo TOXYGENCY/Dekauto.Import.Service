@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.12.35707.178 d17.12
+VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dekauto.Import.Service", "Dekauto.Import.Service\Dekauto.Import.Service.csproj", "{8E37FAFB-884D-4C7A-9289-2A848C593161}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImportTest", "ImportTest\ImportTest.csproj", "{7BC5C6BC-E9D3-46DF-BD61-C47CE02BA7CB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{8E37FAFB-884D-4C7A-9289-2A848C593161}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E37FAFB-884D-4C7A-9289-2A848C593161}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E37FAFB-884D-4C7A-9289-2A848C593161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BC5C6BC-E9D3-46DF-BD61-C47CE02BA7CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BC5C6BC-E9D3-46DF-BD61-C47CE02BA7CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BC5C6BC-E9D3-46DF-BD61-C47CE02BA7CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BC5C6BC-E9D3-46DF-BD61-C47CE02BA7CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

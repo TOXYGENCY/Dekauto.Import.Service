@@ -4,7 +4,9 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ServiceAuth__ClientId": "students_service",
+        "ServiceAuth__ClientSecret": "import-secret"
       },
       "applicationUrl": "https://localhost:7053;http://localhost:7054"
     }
