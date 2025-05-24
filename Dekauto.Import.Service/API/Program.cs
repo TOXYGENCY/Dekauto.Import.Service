@@ -71,29 +71,41 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddTransient<IImportService, ImportsService>();
 builder.Services.AddSingleton<IRequestMetricsService, RequestMetricsService>();
 builder.Services.AddScoped<Mutation>();
-builder.Services
+// Включаем межсервисную авторизацию по конфигу
+if (Boolean.Parse(builder.Configuration["UseEndpointAuth"] ?? "true"))
+{
+    builder.Services
     .AddAuthentication("Basic")
     .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
         "Basic",
         options => { });
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder("Basic")
-        .RequireAuthenticatedUser()
-        .Build();
-});
-builder.Services
-    .AddGraphQLServer()
-    .AddAuthorization(options =>
+
+    // Общая политика (можно использовать и для GraphQL и для обычных endpoints)
+    builder.Services.AddAuthorization(options =>
     {
-        options.DefaultPolicy = new AuthorizationPolicyBuilder()
-            .AddAuthenticationSchemes("Basic") // Явно указываем схему
+        options.DefaultPolicy = new AuthorizationPolicyBuilder("Basic")
             .RequireAuthenticatedUser()
             .Build();
-    })
+    });
+}
+else
+{
+    // Заглушка политик доступа, если авторизация выключена
+    builder.Services.AddAuthorizationBuilder()
+    .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+    .RequireAssertion(_ => true) // Всегда разрешаем доступ
+    .Build());
+}
+
+// Включаем GraphQL по конфигу
+if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
+{
+    builder.Services
+    .AddGraphQLServer()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
     .AddType<UploadType>();
+}
 
 builder.WebHost.ConfigureKestrel(options =>
 {
@@ -112,16 +124,32 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseRouting();
 app.UseCors("AllowAll");
 
-app.UseAuthentication();
-app.UseAuthorization();
+if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
+{
+    app.MapGraphQL();
+    Log.Information("Enabled GraphQL.");
+}
 
+// Включаем межсервисную авторизацию (в том числе через [Authorize])
+if (Boolean.Parse(app.Configuration["UseEndpointAuth"] ?? "true"))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+    Log.Information("Enabled basic authorization.");
 
+    if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
+    {
+        app.MapGraphQL().RequireAuthorization();
+        Log.Information("Enabled GraphQL with authorization.");
+    }
+}
+else
+{
+    Log.Warning("Disabled authorization.");
+}
 
-
-app.MapGraphQL().RequireAuthorization();
 
 // Configure the HTTP request pipeline.
 
@@ -130,13 +158,21 @@ app.Urls.Add("http://*:5503");
 
 if (app.Environment.IsDevelopment())
 {
+    Log.Warning("Development version of the application is started. Swagger activation...");
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-else
+
+// Включаем https, если указано в конфиге
+if (Boolean.Parse(app.Configuration["UseHttps"] ?? "false"))
 {
     app.Urls.Add("https://*:5504");
-    app.UseHttpsRedirection(); // без https редиректа в dev-версии
+    app.UseHttpsRedirection();
+    Log.Information("Enabled HTTPS.");
+}
+else
+{
+    Log.Warning("Disabled HTTPS.");
 }
 
 app.MapControllers();
