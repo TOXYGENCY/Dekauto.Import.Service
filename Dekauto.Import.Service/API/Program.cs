@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
@@ -9,52 +9,54 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-
-//Serilog
-Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-    .MinimumLevel.Override("System", LogEventLevel.Warning)
-    .Enrich.FromLogContext()
-    .Enrich.WithMachineName()
-    .Enrich.WithEnvironmentUserName()
-    .WriteTo.Console(
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
-    )
-    .WriteTo.File("logs/Dekauto-Students-.log",
-        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
-        rollingInterval: RollingInterval.Day,
-        rollOnFileSizeLimit: true,
-        fileSizeLimitBytes: 10_485_760,
-        retainedFileCountLimit: 31,
-        encoding: Encoding.UTF8)
-    .CreateLogger();
-
-builder.Host.UseSerilog();
-
-builder.Services.AddSwaggerGen(c =>
+try
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Import Service", Version = "v1" });
+    var builder = WebApplication.CreateBuilder(args);
 
-    c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "Basic",
-        In = ParameterLocation.Header,
-        Description = "Basic Authorization header using the Bearer scheme."
-    });
+    // Add services to the container.
 
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    builder.Services.AddControllers();
+    // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    builder.Services.AddEndpointsApiExplorer();
+
+    //Serilog
+    Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Information()
+        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+        .MinimumLevel.Override("System", LogEventLevel.Warning)
+        .Enrich.FromLogContext()
+        .Enrich.WithMachineName()
+        .Enrich.WithEnvironmentUserName()
+        .WriteTo.Console(
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+        )
+        .WriteTo.File("logs/Dekauto-Students-.log",
+            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
+            rollingInterval: RollingInterval.Day,
+            rollOnFileSizeLimit: true,
+            fileSizeLimitBytes: 10_485_760,
+            retainedFileCountLimit: 31,
+            encoding: Encoding.UTF8)
+        .CreateLogger();
+
+    builder.Host.UseSerilog();
+
+    builder.Services.AddSwaggerGen(c =>
     {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Import Service", Version = "v1" });
+
+        c.AddSecurityDefinition("Basic", new OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = SecuritySchemeType.Http,
+            Scheme = "Basic",
+            In = ParameterLocation.Header,
+            Description = "Basic Authorization header using the Bearer scheme."
+        });
+
+        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        {
         {
             new OpenApiSecurityScheme
             {
@@ -66,81 +68,126 @@ builder.Services.AddSwaggerGen(c =>
             },
             new string[] {}
         }
+        });
     });
-});
-builder.Services.AddTransient<IImportService, ImportsService>();
-builder.Services.AddSingleton<IRequestMetricsService, RequestMetricsService>();
-builder.Services.AddScoped<Mutation>();
-builder.Services
-    .AddAuthentication("Basic")
-    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
-        "Basic",
-        options => { });
-builder.Services.AddAuthorization(options =>
-{
-    options.DefaultPolicy = new AuthorizationPolicyBuilder("Basic")
-        .RequireAuthenticatedUser()
-        .Build();
-});
-builder.Services
-    .AddGraphQLServer()
-    .AddAuthorization(options =>
+    builder.Services.AddTransient<IImportService, ImportsService>();
+    builder.Services.AddSingleton<IRequestMetricsService, RequestMetricsService>();
+    builder.Services.AddScoped<Mutation>();
+    // Включаем межсервисную авторизацию по конфигу
+    if (Boolean.Parse(builder.Configuration["UseEndpointAuth"] ?? "true"))
     {
-        options.DefaultPolicy = new AuthorizationPolicyBuilder()
-            .AddAuthenticationSchemes("Basic") // ���� ��������� �����
-            .RequireAuthenticatedUser()
-            .Build();
-    })
-    .AddQueryType<Query>()
-    .AddMutationType<Mutation>()
-    .AddType<UploadType>();
+        builder.Services
+        .AddAuthentication("Basic")
+        .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>(
+            "Basic",
+            options => { });
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.Limits.MaxRequestBodySize = 524_288_000; // 500 MB
-});
+        // Общая политика (можно использовать и для GraphQL и для обычных endpoints)
+        builder.Services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder("Basic")
+                .RequireAuthenticatedUser()
+                .Build();
+        });
+    }
+    else
+    {
+        // Заглушка политик доступа, если авторизация выключена
+        builder.Services.AddAuthorizationBuilder()
+        .SetDefaultPolicy(new AuthorizationPolicyBuilder()
+        .RequireAssertion(_ => true) // Всегда разрешаем доступ
+        .Build());
+    }
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithExposedHeaders("WWW-Authenticate"));
-});
+    // Включаем GraphQL по конфигу
+    if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
+    {
+        builder.Services
+        .AddGraphQLServer()
+        .AddQueryType<Query>()
+        .AddMutationType<Mutation>()
+        .AddType<UploadType>();
+    }
 
-var app = builder.Build();
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.Limits.MaxRequestBodySize = 524_288_000; // 500 MB
+    });
 
-app.UseRouting();
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("AllowAll",
+            builder => builder
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .WithExposedHeaders("WWW-Authenticate"));
+    });
+
+    var app = builder.Build();
+
 app.UseCors("AllowAll");
 
-app.UseAuthentication();
-app.UseAuthorization();
-
-
-
-
-app.MapGraphQL().RequireAuthorization();
-
-// Configure the HTTP request pipeline.
-
-// ���� ��������� ����� (��� Docker)
-app.Urls.Add("http://*:5503");
-
-if (app.Environment.IsDevelopment())
+if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapGraphQL();
+    Log.Information("Enabled GraphQL.");
+}
+
+// Включаем межсервисную авторизацию (в том числе через [Authorize])
+if (Boolean.Parse(app.Configuration["UseEndpointAuth"] ?? "true"))
+{
+    app.UseAuthentication();
+    app.UseAuthorization();
+    Log.Information("Enabled basic authorization.");
+
+    if (Boolean.Parse(builder.Configuration["UseGraphQL"] ?? "true"))
+    {
+        app.MapGraphQL().RequireAuthorization();
+        Log.Information("Enabled GraphQL with authorization.");
+    }
 }
 else
 {
-    app.Urls.Add("https://*:5504");
-    app.UseHttpsRedirection(); // ��� https ��������� � dev-������
+    Log.Warning("Disabled authorization.");
 }
 
-app.MapControllers();
 
-app.UseMetricsMiddleware(); // �������
+    // Configure the HTTP request pipeline.
 
-app.Run();
+    // Явно указываем порты (для Docker)
+    app.Urls.Add("http://*:5503");
+
+if (app.Environment.IsDevelopment())
+{
+    Log.Warning("Development version of the application is started. Swagger activation...");
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Включаем https, если указано в конфиге
+if (Boolean.Parse(app.Configuration["UseHttps"] ?? "false"))
+{
+    app.Urls.Add("https://*:5504");
+    app.UseHttpsRedirection();
+    Log.Information("Enabled HTTPS.");
+}
+else
+{
+    Log.Warning("Disabled HTTPS.");
+}
+
+    app.MapControllers();
+
+    app.UseMetricsMiddleware(); // Метрики
+
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "An unexpected Fatal error has occurred in the application.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
