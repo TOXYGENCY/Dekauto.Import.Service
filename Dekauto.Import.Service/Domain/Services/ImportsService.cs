@@ -127,7 +127,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
 
-                                if (header.ToLower() == "фио студента" || header.ToLower() == "фио обучающегося")
+                                if (header.ToLower() == "фио студента" || header.ToLower() == "фио обучающегося" || header.ToLower() == "фио")
                                 {
                                     string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
                                     if (cellfio == fio)
