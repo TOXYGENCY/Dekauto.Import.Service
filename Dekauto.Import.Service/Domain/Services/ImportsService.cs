@@ -285,17 +285,21 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.Citizenship = cellValue.ToString();
                                     break;
                                 case "предмет1":
-                                    student.GiaExam1Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam1Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "предмет2":
-                                    student.GiaExam2Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam2Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "предмет3":
-                                    student.GiaExam3Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam3Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "сумма баллов за инд.дост.(конкурсные)":
                                 case "сумма баллов за инд.дост.":
-                                    student.BonusScores = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.BonusScores = short.Parse(cellValue.ToString());
                                     break;
                                 case "адрес по прописке":
                                     student.AddressRegistrationIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
