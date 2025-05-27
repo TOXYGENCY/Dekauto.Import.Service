@@ -9,9 +9,11 @@ namespace Dekauto.Import.Service.Domain.Services
     public class ImportsService : IImportService
     {
         private IConfiguration configuration;
-        public ImportsService(IConfiguration configuration)
+        private readonly ILogger<ImportsService> logger;
+        public ImportsService(IConfiguration configuration, ILogger<ImportsService> logger)
         {
             this.configuration = configuration;
+            this.logger = logger;
         }
         public async Task<IEnumerable<Student>> GetStudentsContract(IFormFile contract, List<Student> students)
         {
@@ -58,12 +60,15 @@ namespace Dekauto.Import.Service.Domain.Services
                             {
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
+
+                                logger.LogInformation($"Работа с ячейкой: [{col},{row}]; столбец {header}");
+
                                 switch (header.ToLower()) 
                                 {
                                     case "дата":
                                         if (isCurrentStudent == true) 
                                         {
-                                            DateTime date = (DateTime)cellValue;
+                                            DateTime date = DateTime.Parse(cellValue.ToString());
                                             student.EducationRelationDate = DateOnly.FromDateTime(date);
                                             student.EducationStartYear = short.Parse(student.EducationRelationDate.Value.Year.ToString());
                                             student.EducationFinishYear = (short)(student.EducationStartYear + student.EducationTime);
@@ -122,7 +127,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
 
-                                if (header.ToLower() == "фио студента" || header.ToLower() == "фио обучающегося")
+                                if (header.ToLower() == "фио студента" || header.ToLower() == "фио обучающегося" || header.ToLower() == "фио")
                                 {
                                     string cellfio = cellValue.ToString().ToLower().Replace(" ", "");
                                     if (cellfio == fio)
@@ -136,6 +141,9 @@ namespace Dekauto.Import.Service.Domain.Services
                             {
                                 var header = headers[col - 1];
                                 var cellValue = worksheet.Cells[row, col].Value ?? "";
+
+                                logger.LogInformation($"Работа с ячейкой: [{col},{row}]; столбец {header}");
+
                                 switch (header.ToLower()) 
                                 {
                                     case "№ студ.билета и зачетной книжки": 
@@ -212,6 +220,16 @@ namespace Dekauto.Import.Service.Domain.Services
                             string apartementPattern = @"кв\.\s+(\w+)";
                             string numConcursPattern = @"(\d{2}\.\d{2}\.\d{2})";
 
+                            logger.LogInformation($"Работа с ячейкой: [{col},{row}]; столбец {header}");
+
+
+                            switch (header.ToLower())
+                            {
+                                case "фио":
+                                    if (cellValue == "") return students;
+                                    break;
+                            }
+
                             switch (header.ToLower()) 
                             {
                                 case "фио":
@@ -233,7 +251,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     else student.Gender = false;
                                     break;
                                 case "дата рождения":
-                                    DateTime birthdayDate = (DateTime)cellValue;
+                                    DateTime birthdayDate = DateTime.Parse(cellValue.ToString());
                                     student.BirthdayDate = DateOnly.FromDateTime(birthdayDate);
                                     break;
                                 case "место рождения":
@@ -260,24 +278,28 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.PassportIssuanceCode = cellValue.ToString();
                                     break;
                                 case "дата выдачи паспорта": // Здесь нужны уточнения, как называется поле и существует ли вообще
-                                    DateTime passportDate = (DateTime)cellValue;
+                                    DateTime passportDate = DateTime.Parse(cellValue.ToString());
                                     student.PassportIssuanceDate = DateOnly.FromDateTime(passportDate);
                                     break;
                                 case "гражданство":
                                     student.Citizenship = cellValue.ToString();
                                     break;
                                 case "предмет1":
-                                    student.GiaExam1Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam1Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "предмет2":
-                                    student.GiaExam2Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam2Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "предмет3":
-                                    student.GiaExam3Score = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.GiaExam3Score = short.Parse(cellValue.ToString());
                                     break;
                                 case "сумма баллов за инд.дост.(конкурсные)":
                                 case "сумма баллов за инд.дост.":
-                                    student.BonusScores = short.Parse(cellValue.ToString());
+                                    if (cellValue != "")
+                                        student.BonusScores = short.Parse(cellValue.ToString());
                                     break;
                                 case "адрес по прописке":
                                     student.AddressRegistrationIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
@@ -356,7 +378,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.EducationReceivedNum = cellValue.ToString();
                                     break;
                                 case "дата выдачи":
-                                    DateTime eduReceivedDate = (DateTime)cellValue;
+                                    
+                                    DateTime eduReceivedDate = DateTime.Parse(cellValue.ToString());
                                     student.EducationReceivedDate = DateOnly.FromDateTime(eduReceivedDate);
                                     break;
                                 case "год завершения":

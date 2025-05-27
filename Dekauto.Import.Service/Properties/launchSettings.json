@@ -3,6 +3,7 @@
     "Dekauto.Import.Service": {
       "commandName": "Project",
       "launchBrowser": true,
+      "launchUrl": "https://localhost:5504/swagger;http://localhost:5503/swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "ServiceAuth__ClientId": "students_service",
