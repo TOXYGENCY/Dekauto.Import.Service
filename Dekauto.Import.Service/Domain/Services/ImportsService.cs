@@ -2,6 +2,7 @@
 using Dekauto.Import.Service.Domain.Interfaces;
 using OfficeOpenXml;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 namespace Dekauto.Import.Service.Domain.Services
@@ -68,7 +69,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "дата":
                                         if (isCurrentStudent == true) 
                                         {
-                                            DateTime date = DateTime.Parse(cellValue.ToString());
+                                            DateTime date = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
                                             student.EducationRelationDate = DateOnly.FromDateTime(date);
                                             student.EducationStartYear = short.Parse(student.EducationRelationDate.Value.Year.ToString());
                                             student.EducationFinishYear = (short)(student.EducationStartYear + student.EducationTime);
@@ -83,7 +84,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "№ приказа о зачислении": case "номер приказа о зачислении":
                                         if (isCurrentStudent == true)
                                         {
-                                            DateTime date = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString());
+                                            DateTime date = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString(), CultureInfo.GetCultureInfo("ru-RU"));
                                             student.EnrollementOrderDate = DateOnly.FromDateTime(date);
                                             student.EnrollementOrderNum = Regex.Match(cellValue.ToString(), enrollementOrderNumPattern).ToString();
                                         }
@@ -251,7 +252,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     else student.Gender = false;
                                     break;
                                 case "дата рождения":
-                                    DateTime birthdayDate = DateTime.Parse(cellValue.ToString());
+                                    DateTime birthdayDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
                                     student.BirthdayDate = DateOnly.FromDateTime(birthdayDate);
                                     break;
                                 case "место рождения":
@@ -278,7 +279,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.PassportIssuanceCode = cellValue.ToString();
                                     break;
                                 case "дата выдачи паспорта": // Здесь нужны уточнения, как называется поле и существует ли вообще
-                                    DateTime passportDate = DateTime.Parse(cellValue.ToString());
+                                    DateTime passportDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
                                     student.PassportIssuanceDate = DateOnly.FromDateTime(passportDate);
                                     break;
                                 case "гражданство":
@@ -379,7 +380,7 @@ namespace Dekauto.Import.Service.Domain.Services
                                     break;
                                 case "дата выдачи":
                                     
-                                    DateTime eduReceivedDate = DateTime.Parse(cellValue.ToString());
+                                    DateTime eduReceivedDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
                                     student.EducationReceivedDate = DateOnly.FromDateTime(eduReceivedDate);
                                     break;
                                 case "год завершения":
