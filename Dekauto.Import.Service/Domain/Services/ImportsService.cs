@@ -69,8 +69,24 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "дата":
                                         if (isCurrentStudent == true) 
                                         {
-                                            DateTime date = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
-                                            student.EducationRelationDate = DateOnly.FromDateTime(date);
+                                            if (cellValue is DateTime excelDate) 
+                                            {
+                                                student.EducationRelationDate = DateOnly.FromDateTime(excelDate);
+                                            } 
+                                            else
+                                            {
+                                                string dateStr = cellValue.ToString().Trim();
+                                                if (DateTime.TryParseExact(
+                                                    dateStr,
+                                                    "dd.MM.yyyy",
+                                                    CultureInfo.InvariantCulture,
+                                                    DateTimeStyles.None,
+                                                    out DateTime parsedDate))
+                                                {
+                                                    student.EducationRelationDate = DateOnly.FromDateTime(parsedDate);
+                                                }
+                                                else throw new FormatException($"Не удалось распознать дату: {dateStr}");
+                                            }
                                             student.EducationStartYear = short.Parse(student.EducationRelationDate.Value.Year.ToString());
                                             student.EducationFinishYear = (short)(student.EducationStartYear + student.EducationTime);
                                         }
@@ -84,8 +100,19 @@ namespace Dekauto.Import.Service.Domain.Services
                                     case "№ приказа о зачислении": case "номер приказа о зачислении":
                                         if (isCurrentStudent == true)
                                         {
-                                            DateTime date = DateTime.Parse(Regex.Match(cellValue.ToString(), enrollementOrderDatePattern).ToString(), CultureInfo.GetCultureInfo("ru-RU"));
-                                            student.EnrollementOrderDate = DateOnly.FromDateTime(date);
+                                            string dateStr = Regex.Match(cellValue.ToString().Trim(), enrollementOrderDatePattern).ToString();
+
+                                            if (DateTime.TryParseExact(
+                                                   dateStr,
+                                                   "dd.MM.yyyy",
+                                                   CultureInfo.InvariantCulture,
+                                                   DateTimeStyles.None,
+                                                   out DateTime parsedDate))
+                                            {
+                                                student.EnrollementOrderDate = DateOnly.FromDateTime(parsedDate);
+                                            }
+                                            else throw new FormatException($"Не удалось распознать дату: {dateStr}");
+
                                             student.EnrollementOrderNum = Regex.Match(cellValue.ToString(), enrollementOrderNumPattern).ToString();
                                         }
                                         break;
@@ -252,8 +279,24 @@ namespace Dekauto.Import.Service.Domain.Services
                                     else student.Gender = false;
                                     break;
                                 case "дата рождения":
-                                    DateTime birthdayDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
-                                    student.BirthdayDate = DateOnly.FromDateTime(birthdayDate);
+                                    if (cellValue is DateTime birDate)
+                                    {
+                                        student.BirthdayDate = DateOnly.FromDateTime(birDate);
+                                    }
+                                    else
+                                    {
+                                        string dateStr = cellValue.ToString().Trim();
+                                        if (DateTime.TryParseExact(
+                                            dateStr,
+                                            "dd.MM.yyyy",
+                                            CultureInfo.InvariantCulture,
+                                            DateTimeStyles.None,
+                                            out DateTime parsedDate))
+                                        {
+                                            student.BirthdayDate = DateOnly.FromDateTime(parsedDate);
+                                        }
+                                        else throw new FormatException($"Не удалось распознать дату: {dateStr}");
+                                    }
                                     break;
                                 case "место рождения":
                                     student.BirthdayPlace = cellValue.ToString();
@@ -279,8 +322,24 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.PassportIssuanceCode = cellValue.ToString();
                                     break;
                                 case "дата выдачи паспорта": // Здесь нужны уточнения, как называется поле и существует ли вообще
-                                    DateTime passportDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
-                                    student.PassportIssuanceDate = DateOnly.FromDateTime(passportDate);
+                                    if (cellValue is DateTime pasDate)
+                                    {
+                                        student.PassportIssuanceDate = DateOnly.FromDateTime(pasDate);
+                                    }
+                                    else
+                                    {
+                                        string dateStr = cellValue.ToString().Trim();
+                                        if (DateTime.TryParseExact(
+                                            dateStr,
+                                            "dd.MM.yyyy",
+                                            CultureInfo.InvariantCulture,
+                                            DateTimeStyles.None,
+                                            out DateTime parsedDate))
+                                        {
+                                            student.PassportIssuanceDate = DateOnly.FromDateTime(parsedDate);
+                                        }
+                                        else throw new FormatException($"Не удалось распознать дату: {dateStr}");
+                                    }
                                     break;
                                 case "гражданство":
                                     student.Citizenship = cellValue.ToString();
@@ -379,9 +438,20 @@ namespace Dekauto.Import.Service.Domain.Services
                                     student.EducationReceivedNum = cellValue.ToString();
                                     break;
                                 case "дата выдачи":
-                                    
-                                    DateTime eduReceivedDate = DateTime.Parse(cellValue.ToString(), CultureInfo.GetCultureInfo("ru-RU"));
-                                    student.EducationReceivedDate = DateOnly.FromDateTime(eduReceivedDate);
+                                    if (cellValue is DateTime exDate) student.EducationReceivedDate = DateOnly.FromDateTime(exDate);
+                                    else { 
+                                        string dateStr = cellValue.ToString().Trim();
+                                        if (DateTime.TryParseExact(
+                                            dateStr,
+                                            "dd.MM.yyyy",
+                                            CultureInfo.InvariantCulture,
+                                            DateTimeStyles.None,
+                                            out DateTime parsedDate))
+                                        {
+                                            student.EducationReceivedDate = DateOnly.FromDateTime(parsedDate);
+                                        }
+                                        else throw new FormatException($"Не удалось распознать дату: {dateStr}");
+                                    }
                                     break;
                                 case "год завершения":
                                     student.EducationReceivedEndYear = short.Parse(cellValue.ToString());
