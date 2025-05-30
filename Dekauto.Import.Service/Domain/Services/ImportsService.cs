@@ -362,68 +362,72 @@ namespace Dekauto.Import.Service.Domain.Services
                                         student.BonusScores = short.Parse(cellValue.ToString());
                                     break;
                                 case "адрес по прописке":
-                                    student.AddressRegistrationIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
-                                    student.AddressRegistrationCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
-                                    switch (Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString())
+                                    if (cellValue.ToString() != "")
                                     {
-                                        case "г":
-                                            student.AddressRegistrationType = "город:";
-                                            break;
-                                        case "с":
-                                            student.AddressRegistrationType = "село:";
-                                            break;
-                                        case "х":
-                                            student.AddressRegistrationType = "хутор:";
-                                            break;
-                                        case "д":
-                                            student.AddressRegistrationType = "деревня:";
-                                            break;
-                                        case "п":
-                                            student.AddressRegistrationType = "посёлок:";
-                                            break;
-                                    }
-                                    student.AddressRegistrationHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
-                                    student.AddressRegistrationStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
-                                    if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к") 
-                                        student.AddressRegistrationHousingType = "корпус";
-                                    else
-                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "стр") 
+                                        student.AddressRegistrationIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
+                                        student.AddressRegistrationCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
+                                        switch (Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString())
+                                        {
+                                            case "г":
+                                                student.AddressRegistrationType = "город:";
+                                                break;
+                                            case "с":
+                                                student.AddressRegistrationType = "село:";
+                                                break;
+                                            case "х":
+                                                student.AddressRegistrationType = "хутор:";
+                                                break;
+                                            case "д":
+                                                student.AddressRegistrationType = "деревня:";
+                                                break;
+                                            case "п":
+                                                student.AddressRegistrationType = "посёлок:";
+                                                break;
+                                        }
+                                        student.AddressRegistrationHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
+                                        student.AddressRegistrationStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
+                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к")
+                                            student.AddressRegistrationHousingType = "корпус";
+                                        else
+                                            if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "стр")
                                             student.AddressRegistrationHousingType = "строение";
-                                    student.AddressRegistrationHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
-                                    student.AddressRegistrationApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+                                        student.AddressRegistrationHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
+                                        student.AddressRegistrationApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+                                    }
                                     break;
 
                                 case "адрес проживания":
-                                    student.AddressResidentialIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
-                                    student.AddressResidentialCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
-                                    switch(Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString()) 
-                                    {
-                                        case "г":
-                                            student.AddressResidentialType = "город:";
-                                            break;
-                                        case "с":
-                                            student.AddressResidentialType = "село:";
-                                            break;
-                                        case "х":
-                                            student.AddressResidentialType = "хутор:";
-                                            break;
-                                        case "д":
-                                            student.AddressResidentialType = "деревня:";
-                                            break;
-                                        case "п":
-                                            student.AddressResidentialType = "посёлок:";
-                                            break;
+                                    if (cellValue.ToString() != "") { 
+                                        student.AddressResidentialIndex = Regex.Match(cellValue.ToString(), indexPattern).ToString();
+                                        student.AddressResidentialCity = Regex.Match(cellValue.ToString(), cityPattern).Groups[1].ToString();
+                                        switch(Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString()) 
+                                        {
+                                            case "г":
+                                                student.AddressResidentialType = "город:";
+                                                break;
+                                            case "с":
+                                                student.AddressResidentialType = "село:";
+                                                break;
+                                            case "х":
+                                                student.AddressResidentialType = "хутор:";
+                                                break;
+                                            case "д":
+                                                student.AddressResidentialType = "деревня:";
+                                                break;
+                                            case "п":
+                                                student.AddressResidentialType = "посёлок:";
+                                                break;
+                                        }
+                                        student.AddressResidentialHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
+                                        student.AddressResidentialStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
+                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к")
+                                            student.AddressResidentialHousingType = "корпус";
+                                        else
+                                            if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "стр")
+                                            student.AddressResidentialHousingType = "строение";
+                                        student.AddressResidentialHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
+                                        student.AddressResidentialApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
                                     }
-                                    student.AddressResidentialHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
-                                    student.AddressResidentialStreet = Regex.Match(cellValue.ToString(), streetPattern).Groups[1].ToString().Trim();
-                                    if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "к")
-                                        student.AddressResidentialHousingType = "корпус";
-                                    else
-                                        if (Regex.Match(cellValue.ToString(), housingTypePattern).Groups[1].ToString().Trim() == "стр")
-                                        student.AddressResidentialHousingType = "строение";
-                                    student.AddressResidentialHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
-                                    student.AddressResidentialApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
-
                                     break;
                                 case "конкурсная группа":
                                     courseOfTraining = Regex.Match(cellValue.ToString(), numConcursPattern).Groups[1].ToString().Trim();
@@ -465,6 +469,19 @@ namespace Dekauto.Import.Service.Domain.Services
                                 case "образовательное учреждение":
                                     student.OOName = cellValue.ToString();
                                     break;
+                            }
+                            if ((header.ToLower() == "адрес проживания" ) && (cellValue.ToString() == "")) 
+                            {
+                                student.AddressResidentialCity = student.AddressRegistrationCity;
+                                student.AddressResidentialApartment = student.AddressRegistrationApartment;
+                                student.AddressResidentialDistrict = student.AddressRegistrationDistrict;
+                                student.AddressResidentialHouse = student.AddressRegistrationHouse;
+                                student.AddressResidentialHousing = student.AddressRegistrationHousing;
+                                student.AddressResidentialHousingType = student.AddressRegistrationHousingType;
+                                student.AddressResidentialIndex = student.AddressRegistrationIndex;
+                                student.AddressResidentialOblKrayAvtobl = student.AddressRegistrationOblKrayAvtobl;
+                                student.AddressResidentialStreet = student.AddressRegistrationStreet;
+                                student.AddressResidentialType = student.AddressRegistrationType;
                             }
                         }
                         students.Add(student);
