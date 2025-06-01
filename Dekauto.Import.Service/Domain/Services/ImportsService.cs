@@ -239,14 +239,15 @@ namespace Dekauto.Import.Service.Domain.Services
                             var cellValue = worksheet.Cells[row, col].Value ?? "";
 
                             string indexPattern = @"\b\d{6}\b";
-                            string addressTypePattern = @"\b(?:\w+)\s+([г|с|х|д|п])\b(?:\,)";
-                            string cityPattern = @"\b(\w+)\s+(?:[г|с|х|д|п]\,)"; // Пока что тригер работает только на города и села, для увеличения вариантов нужно идти в деканат
-                            string housePattern = @"\b(?:д\.)\s+(\w+)\b(?:,)?";
-                            string streetPattern = @",\s*([^,]*?)\s*,\s+д\.";
-                            string housingTypePattern = @"\b([к|стр])\.\w*?"; // Нужно уточнение, как обозначается строение
-                            string housingPattern = @"[к|стр]\.\s+(\w+)";
-                            string apartementPattern = @"кв\.\s+(\w+)";
+                            string addressTypePattern = @"\b(?:\w+\s+(?<abbr>[гсхдп])\b|(?<abbr>[гсхдп])\.?\s+\w+\b)";
+                            string cityPattern = @"\b(?:(?<city>[\w\s]+?)\s+[гсхдп]\,?|(?<type>[гсхдп])\.?\s*(?<city>[\w\s]+?))\b";
+                            string housePattern = @"(?:\bдом|д)\.?\s*(\w+)\b,?|\bд(\w+)\b";
+                            string streetPattern = @",?\s*([^,]+?)\s*,\s*(?:дом|д)\.";
+                            string housingTypePattern = @"\b(к|стр)\.";
+                            string housingPattern = @"(?:к|стр)\.\s*(\w+)";
+                            string apartementPattern = @"кв\.\s*(\w+)";
                             string numConcursPattern = @"(\d{2}\.\d{2}\.\d{2})";
+                            string regionPattern = @"(?:^|,)\s*(?<region>[\w\s-]+?)\s*(?<type>обл\.?|кр\.?|край|автономная\s+область|авт\.?\s*обл\.?|АО)\b";
 
                             logger.LogInformation($"Работа с ячейкой: [{col},{row}]; столбец {header}");
 
@@ -369,19 +370,19 @@ namespace Dekauto.Import.Service.Domain.Services
                                         switch (Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString())
                                         {
                                             case "г":
-                                                student.AddressRegistrationType = "город:";
+                                                student.AddressRegistrationType = "город";
                                                 break;
                                             case "с":
-                                                student.AddressRegistrationType = "село:";
+                                                student.AddressRegistrationType = "село";
                                                 break;
                                             case "х":
-                                                student.AddressRegistrationType = "хутор:";
+                                                student.AddressRegistrationType = "хутор";
                                                 break;
                                             case "д":
-                                                student.AddressRegistrationType = "деревня:";
+                                                student.AddressRegistrationType = "деревня";
                                                 break;
                                             case "п":
-                                                student.AddressRegistrationType = "посёлок:";
+                                                student.AddressRegistrationType = "посёлок";
                                                 break;
                                         }
                                         student.AddressRegistrationHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
@@ -393,6 +394,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                             student.AddressRegistrationHousingType = "строение";
                                         student.AddressRegistrationHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
                                         student.AddressRegistrationApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+                                        student.AddressRegistrationOblKrayAvtobl = Regex.Match(cellValue.ToString(), regionPattern).Groups[1].ToString().Trim();
+
                                     }
                                     break;
 
@@ -403,19 +406,19 @@ namespace Dekauto.Import.Service.Domain.Services
                                         switch(Regex.Match(cellValue.ToString(), addressTypePattern).Groups[1].ToString()) 
                                         {
                                             case "г":
-                                                student.AddressResidentialType = "город:";
+                                                student.AddressResidentialType = "город";
                                                 break;
                                             case "с":
-                                                student.AddressResidentialType = "село:";
+                                                student.AddressResidentialType = "село";
                                                 break;
                                             case "х":
-                                                student.AddressResidentialType = "хутор:";
+                                                student.AddressResidentialType = "хутор";
                                                 break;
                                             case "д":
-                                                student.AddressResidentialType = "деревня:";
+                                                student.AddressResidentialType = "деревня";
                                                 break;
                                             case "п":
-                                                student.AddressResidentialType = "посёлок:";
+                                                student.AddressResidentialType = "посёлок";
                                                 break;
                                         }
                                         student.AddressResidentialHouse = Regex.Match(cellValue.ToString(), housePattern).Groups[1].ToString();
@@ -427,6 +430,8 @@ namespace Dekauto.Import.Service.Domain.Services
                                             student.AddressResidentialHousingType = "строение";
                                         student.AddressResidentialHousing = Regex.Match(cellValue.ToString(), housingPattern).Groups[1].ToString().Trim();
                                         student.AddressResidentialApartment = Regex.Match(cellValue.ToString(), apartementPattern).Groups[1].ToString().Trim();
+                                        student.AddressResidentialOblKrayAvtobl = Regex.Match(cellValue.ToString(), regionPattern).Groups[1].ToString().Trim();
+
                                     }
                                     break;
                                 case "конкурсная группа":
@@ -482,6 +487,13 @@ namespace Dekauto.Import.Service.Domain.Services
                                 student.AddressResidentialOblKrayAvtobl = student.AddressRegistrationOblKrayAvtobl;
                                 student.AddressResidentialStreet = student.AddressRegistrationStreet;
                                 student.AddressResidentialType = student.AddressRegistrationType;
+                            }
+                            if (student.EducationReceivedEndYear == null) 
+                            {
+                                if (student.EducationReceivedDate.HasValue)
+                                {
+                                    student.EducationReceivedEndYear = (short)student.EducationReceivedDate.Value.Year;
+                                }
                             }
                         }
                         students.Add(student);
