@@ -38,9 +38,11 @@ namespace Dekauto.Import.Service.API.Controllers
                     System.IO.Path.GetExtension(contract.FileName) != ".xlsx" || 
                     System.IO.Path.GetExtension(journal.FileName) != ".xlsx") throw new FileLoadException(
                     "Неподдерживаемый формат файла. Пожалуйста, загрузите файл в формате .xlsx");
-                logger.LogInformation($"Начало работы с файлами: {ld.FileName} {contract.FileName} {journal.FileName}");
+                logger.LogInformation($"Начало работы с файлом: {ld.FileName}");
                 var studentsLD = await _importService.GetStudentsLD(ld);
+                logger.LogInformation($"Начало работы с файлом: {contract.FileName}");
                 var studentsOrder = await _importService.GetStudentsContract(contract, (List<Domain.Entities.Student>)studentsLD);
+                logger.LogInformation($"Начало работы с файлом: {journal.FileName}");
                 var students = await _importService.GetStudentsJournal(journal, (List<Domain.Entities.Student>)studentsOrder);
 
                 return Ok(students);
