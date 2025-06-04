@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
+using Serilog.Formatting.Compact;
+using Serilog.Sinks.Grafana.Loki;
 
 try
 {
@@ -29,9 +31,17 @@ try
         .Enrich.WithMachineName()
         .Enrich.WithEnvironmentUserName()
         .WriteTo.Console(
-            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
-        )
-        .WriteTo.File("logs/Dekauto-Students-.log",
+            new CompactJsonFormatter()
+            //outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
+            )
+        .WriteTo.GrafanaLoki(
+                "http://loki:3100",
+                labels: new List<LokiLabel>
+                {
+                    new LokiLabel { Key = "app", Value = "dekauto-import" },
+                    new LokiLabel { Key = "app", Value = "dekauto-full" }
+                })
+        .WriteTo.File("logs/Dekauto-Import-.log",
             outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
             rollingInterval: RollingInterval.Day,
             rollOnFileSizeLimit: true,
