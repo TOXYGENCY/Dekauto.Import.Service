@@ -6,6 +6,7 @@ using Dekauto.Import.Service.Domain.Services.Metric;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi.Models;
+using Prometheus;
 using Serilog;
 using Serilog.Events;
 using Serilog.Formatting.Compact;
@@ -189,6 +190,7 @@ try
 
     app.MapControllers();
 
+    app.MapMetrics();
     app.UseMetricsMiddleware(); // Ìåòðèêè
 
     app.Run();
