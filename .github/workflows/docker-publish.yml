@@ -27,7 +27,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ dekauto.DOCKERHUB_USERNAME }}/dekauto_import_service
+            ${{ secrets.DOCKERHUB_USERNAME }}/dekauto_import_service
           tags: |
             type=ref,event=branch
             type=ref,event=pr
