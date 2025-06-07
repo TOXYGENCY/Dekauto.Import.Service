@@ -9,9 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: 
-      name: dekauto
-      url: https://hub.docker.com/r/${{ secrets.DOCKERHUB_USERNAME }}/dekauto_import_service
+    environment: dekauto
 
     steps:
       - name: Checkout code
