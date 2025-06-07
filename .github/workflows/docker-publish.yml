@@ -16,8 +16,8 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ dekauto.DOCKERHUB_USERNAME }}
+          password: ${{ dekauto.DOCKERHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -27,7 +27,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ${{ secrets.DOCKERHUB_USERNAME }}/dekauto_import_service
+            ${{ dekauto.DOCKERHUB_USERNAME }}/dekauto_import_service
           tags: |
             type=ref,event=branch
             type=ref,event=pr
