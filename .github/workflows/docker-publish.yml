@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     environment: 
-      name: docker-production
+      name: dekauto
       url: https://hub.docker.com/r/${{ secrets.DOCKERHUB_USERNAME }}/dekauto_import_service
 
     steps:
