@@ -9,6 +9,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: 
+      name: docker-production
+      url: https://hub.docker.com/r/${{ secrets.DOCKERHUB_USERNAME }}/dekauto_import_service
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
