@@ -1,5 +1,4 @@
-﻿using System.Text;
-using Dekauto.Import.Service.Domain.Entities;
+﻿using Dekauto.Import.Service.Domain.Entities;
 using Dekauto.Import.Service.Domain.Interfaces;
 using Dekauto.Import.Service.Domain.Services;
 using Dekauto.Import.Service.Domain.Services.Metric;
@@ -9,8 +8,24 @@ using Microsoft.OpenApi.Models;
 using Prometheus;
 using Serilog;
 using Serilog.Events;
-using Serilog.Formatting.Compact;
 using Serilog.Sinks.Grafana.Loki;
+
+var tempOutputTemplate = "[IMPORT STARTUP LOGGER] {Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}";
+// Временные логгер Serilog для этапа до создания билдера
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Fatal) // Только критические ошибки из Microsoft-сервисов
+    .Enrich.FromLogContext()
+    .WriteTo.Console(
+        outputTemplate: tempOutputTemplate,
+        restrictedToMinimumLevel: LogEventLevel.Information
+    )
+    .WriteTo.File(
+        "logs/Import-startup-log.txt",
+        outputTemplate: tempOutputTemplate,
+        rollingInterval: RollingInterval.Day,
+        restrictedToMinimumLevel: LogEventLevel.Warning
+    )
+    .CreateBootstrapLogger(); // временный логгер
 
 try
 {
@@ -22,36 +37,23 @@ try
     // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
     builder.Services.AddEndpointsApiExplorer();
 
-    //Serilog
-    Log.Logger = new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
-        .MinimumLevel.Override("System", LogEventLevel.Warning)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithEnvironmentUserName()
-        .WriteTo.Console(
-            new CompactJsonFormatter()
-            //outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}"
-            )
-        .WriteTo.GrafanaLoki(
-                "http://loki:3100",
+
+    // Полноценная настройка Serilog логгера (из конфига)
+    builder.Host.UseSerilog((builderContext, serilogConfig) =>
+    {
+        serilogConfig
+            .ReadFrom.Configuration(builderContext.Configuration)
+            // Ручная настройка Loki
+            .WriteTo.GrafanaLoki(
+                uri: "http://loki:3100",
                 labels: new List<LokiLabel>
                 {
-                    new LokiLabel { Key = "app", Value = "dekauto-import" },
-                    new LokiLabel { Key = "app", Value = "dekauto-full" }
-                })
-        .WriteTo.File("logs/Dekauto-Import-.log",
-            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} [{Level:u3}] [{SourceContext}] {Message:lj}{NewLine}{Exception}",
-            rollingInterval: RollingInterval.Day,
-            rollOnFileSizeLimit: true,
-            fileSizeLimitBytes: 10_485_760,
-            retainedFileCountLimit: 31,
-            encoding: Encoding.UTF8)
-        .CreateLogger();
-
-    builder.Host.UseSerilog();
+                        new LokiLabel { Key = "app", Value = "dekauto_import" },
+                        new LokiLabel { Key = "app_full", Value = "dekauto_full" }
+                },
+                textFormatter: new LokiJsonTextFormatter()
+            );
+    });
 
     builder.Services.AddSwaggerGen(c =>
     {
@@ -197,7 +199,28 @@ try
 }
 catch (Exception ex)
 {
+    // В случае краха приложения при запуске пытаемся отправить логи:
+    // 1. Запись в файл и консоль контейнера
     Log.Fatal(ex, "An unexpected Fatal error has occurred in the application.");
+    try
+    {
+        // 2. Попытка отправить критическую ошибку в Loki
+        using var tempLogger = new LoggerConfiguration()
+            .WriteTo.GrafanaLoki(
+                "http://loki:3100",
+                labels: new List<LokiLabel>
+                {
+                    new LokiLabel { Key = "app_startup", Value = "dekauto_import_startup" },
+                    new LokiLabel { Key = "app_full", Value = "dekauto_full" }
+                },
+                textFormatter: new LokiJsonTextFormatter())
+            .CreateLogger();
+        tempLogger.Fatal(ex, "[IMPORT TEMPORARY FATAL LOGGER] Application startup failed");
+    }
+    catch (Exception lokiEx)
+    {
+        Log.Warning(lokiEx, "Failed to send log to Loki");
+    }
 }
 finally
 {
