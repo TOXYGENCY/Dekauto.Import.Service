@@ -50,8 +50,10 @@ try
                 Url = new Uri("http://loki:3100"),
                 Labels =
                 [
-                    new LokiLabel("app_startup", "dekauto_import") ,
-                    new LokiLabel("app_full","dekauto_full")
+                    new LokiLabel("service_name", "dekauto_import"),
+                    new LokiLabel("app","dekauto_full"),
+                    new LokiLabel("env",
+                    builderContext.HostingEnvironment.IsDevelopment() ? "dev" : "prod")
                 ]
             });
     });
@@ -212,8 +214,8 @@ catch (Exception ex)
                 Url = new Uri("http://loki:3100"),
                 Labels =
                 [
-                    new LokiLabel("app_startup", "dekauto_import_startup") ,
-                    new LokiLabel("app_full","dekauto_full")
+                    new LokiLabel("service_name", "dekauto_import"),
+                    new LokiLabel("app","dekauto_full")
                 ]
             })
             .CreateLogger();
